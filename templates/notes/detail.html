@@ -23,22 +23,27 @@
                     {% if note.note_type == 'checklist' %}
                     <div class="checklist">
                         {% for line in note.content.splitlines %}
-                        {% if line.strip %}
-                        {% if '[V]' in line %}
-                        <div class="checklist-item">
-                            <input type="checkbox" checked disabled>
-                            <span>{{ line|cut:'[V]'|striptags|cut:' '|capfirst }}</span>
-                        </div>
-                        {% elif '[ ]' in line %}
-                        <div class="checklist-item">
-                            <input type="checkbox" disabled>
-                            <span>{{ line|cut:'[ ]'|striptags|cut:' '|capfirst }}</span>
-                        </div>
-                        {% else %}
-                        <div class="checklist-text">{{ line }}</div>
-                        {% endif %}
-                        {% endif %}
+                            {% if line.strip %}
+                                {% if '[V]' in line %}
+                                    <div class="checklist-item">
+                                        <input type="checkbox" id="item-{{ forloop.counter }}" checked disabled>
+                                        <label for="item-{{ forloop.counter }}">
+                                            {{ line|cut:'[V]'|striptags|trim|capfirst }}
+                                        </label>
+                                    </div>
+                                {% elif '[ ]' in line %}
+                                    <div class="checklist-item">
+                                        <input type="checkbox" id="item-{{ forloop.counter }}" disabled>
+                                        <label for="item-{{ forloop.counter }}">
+                                            {{ line|cut:'[ ]'|striptags|trim|capfirst }}
+                                        </label>
+                                    </div>
+                                {% else %}
+                                    <div class="checklist-text">{{ line }}</div>
+                                {% endif %}
+                            {% endif %}
                         {% endfor %}
+
                     </div>
                     {% else %}
                     <div class="note-content">
