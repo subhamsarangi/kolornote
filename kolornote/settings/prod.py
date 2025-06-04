@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["kolornote.pythonanywhere.com"]
+ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = "/home/kolornote/kolornote/media/"  # BASE_DIR / "media"
