@@ -33,7 +33,7 @@ body {
     line-height: 1.4;
 }
 
-.checklist-item input:checked+span {
+.checklist-item input:checked+label {
     text-decoration: line-through;
     opacity: 0.5;
 }
