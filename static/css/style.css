@@ -12,7 +12,8 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-checklist-item {
+.checklist-item {
+    font-size: 1.2em;
     display: flex;
     align-items: flex-start;
     margin-bottom: 0.5rem;
