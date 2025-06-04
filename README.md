@@ -1,4 +1,4 @@
-# Notes PWA
+# Kolornote
 
 A Django-based Progressive Web App for managing notes and checklists with import functionality.
 

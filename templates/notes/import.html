@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Import Notes - Notes PWA{% endblock %}
+{% block title %}Import Notes - Kolornote{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -16,7 +16,7 @@
                         <label for="{{ form.zip_file.id_for_label }}" class="form-label">ZIP File</label>
                         {{ form.zip_file }}
                         {% if form.zip_file.errors %}
-                            <div class="text-danger">{{ form.zip_file.errors }}</div>
+                        <div class="text-danger">{{ form.zip_file.errors }}</div>
                         {% endif %}
                         <div class="form-text">
                             Upload a ZIP file containing .txt files. The ZIP file name will be used as a color name.
@@ -27,7 +27,7 @@
                 </form>
             </div>
         </div>
-        
+
         <div class="card mt-4">
             <div class="card-header">
                 <h5>Import Format</h5>

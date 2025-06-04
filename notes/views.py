@@ -5,17 +5,18 @@ import logging
 from io import BytesIO
 
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views import View
+from django.contrib.auth.views import LoginView
 
+from accounts.forms import EmailRegistrationForm, EmailLoginForm
 from .models import Note, Color
 from .forms import ImportForm, ColorUpdateForm
 
@@ -23,19 +24,23 @@ from .forms import ImportForm, ColorUpdateForm
 logger = logging.getLogger(__name__)
 
 
-class RegisterView(CreateView):
+class EmailRegisterView(CreateView):
     """User registration view"""
 
-    form_class = UserCreationForm
+    form_class = EmailRegistrationForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("notes:list")
+    success_url = reverse_lazy("login")
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        login(self.request, self.object)
         Color.create_default_color(self.object)
         messages.success(self.request, "Account created successfully!")
         return response
+
+
+class EmailLoginView(LoginView):
+    form_class = EmailLoginForm
+    template_name = "registration/login.html"
 
 
 class NoteListView(LoginRequiredMixin, ListView):
@@ -184,7 +189,7 @@ class ColorUpdateView(LoginRequiredMixin, UpdateView):
 def manifest_view(request):
     """PWA manifest"""
     manifest = {
-        "name": "Notes PWA",
+        "name": "Kolornote",
         "short_name": "Notes",
         "description": "A PWA for managing notes and checklists",
         "start_url": "/",
@@ -210,7 +215,7 @@ def manifest_view(request):
 def service_worker_view(request):
     """Service worker for PWA"""
     sw_content = """
-const CACHE_NAME = 'notes-pwa-v1';
+const CACHE_NAME = 'kolornote-v1';
 const urlsToCache = [
     '/',
     '/static/css/style.css',
