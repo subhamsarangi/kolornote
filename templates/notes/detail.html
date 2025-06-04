@@ -28,14 +28,14 @@
                                     <div class="checklist-item">
                                         <input type="checkbox" id="item-{{ forloop.counter }}" checked disabled>
                                         <label for="item-{{ forloop.counter }}">
-                                            <span>{{ line|cut:'[V]'|striptags|cut:' '|capfirst }}</span>
+                                            <span>{{ line|cut:'[V]'|striptags|capfirst }}</span>
                                         </label>
                                     </div>
                                 {% elif '[ ]' in line %}
                                     <div class="checklist-item">
                                         <input type="checkbox" id="item-{{ forloop.counter }}" disabled>
                                         <label for="item-{{ forloop.counter }}">
-                                            <span>{{ line|cut:'[ ]'|striptags|cut:' '|capfirst }}</span>
+                                            <span>{{ line|cut:'[ ]'|striptags|capfirst }}</span>
                                         </label>
                                     </div>
                                 {% else %}
