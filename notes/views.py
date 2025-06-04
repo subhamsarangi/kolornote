@@ -2,9 +2,7 @@ import os
 import re
 import zipfile
 import logging
-from io import BytesIO
 
-from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.db import transaction
@@ -29,7 +27,7 @@ class EmailRegisterView(CreateView):
 
     form_class = EmailRegistrationForm
     template_name = "registration/register.html"
-    success_url = reverse_lazy("login")
+    success_url = reverse_lazy("notes:login")
 
     def form_valid(self, form):
         response = super().form_valid(form)
