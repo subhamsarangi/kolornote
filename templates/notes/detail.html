@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ note.title }} - Notes PWA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card" style="border-left: 4px solid {{ note.color.hex_value }};">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ note.title }}</h4>
+                <span class="badge bg-secondary">{{ note.note_type|title }}</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Color: {{ note.color.name|default:"Unnamed" }} •
+                        Created: {{ note.created_at|date:"M d, Y H:i" }} •
+                        Modified: {{ note.modified_at|date:"M d, Y H:i" }}
+                    </small>
+                </div>
+
+                <div class="content">
+                    {% if note.note_type == 'checklist' %}
+                    <div class="checklist">
+                        {% for line in note.content.splitlines %}
+                        {% if line.strip %}
+                        {% if '[V]' in line %}
+                        <div class="checklist-item">
+                            <input type="checkbox" checked disabled>
+                            <span>{{ line|cut:'[V]'|striptags|cut:' '|capfirst }}</span>
+                        </div>
+                        {% elif '[ ]' in line %}
+                        <div class="checklist-item">
+                            <input type="checkbox" disabled>
+                            <span>{{ line|cut:'[ ]'|striptags|cut:' '|capfirst }}</span>
+                        </div>
+                        {% else %}
+                        <div class="checklist-text">{{ line }}</div>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="note-content">
+                        {{ note.content|linebreaks }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'notes:list' %}" class="btn btn-secondary">Back to Notes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

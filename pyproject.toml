@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "colornoteclone"
+version = "0.1.0"
+description = ""
+authors = ["subhamsarangi <subhamsarangi2016@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^4.2"
+psycopg2-binary = "^2.9"
+python-decouple = "^3.8"
+
+[tool.poetry.group.dev.dependencies]
+django-debug-toolbar = "^4.2"
+pillow = "^11.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

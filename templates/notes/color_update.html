@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Color - Notes PWA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4>Edit Color</h4>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="color-preview me-3" style="width: 40px; height: 40px; background-color: {{ object.hex_value }}; border: 1px solid #ddd; border-radius: 4px;"></div>
+                    <div>
+                        <h6 class="mb-0">{{ object.hex_value }}</h6>
+                        <small class="text-muted">{{ object.notes.count }} note{{ object.notes.count|pluralize }}</small>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">Color Name</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{% url 'notes:colors' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

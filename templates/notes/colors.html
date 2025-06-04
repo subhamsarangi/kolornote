@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Colors - Notes PWA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2>Manage Colors</h2>
+        
+        <div class="row">
+            {% for color in colors %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="color-preview me-3" style="width: 30px; height: 30px; background-color: {{ color.hex_value }}; border: 1px solid #ddd; border-radius: 4px;"></div>
+                                <div>
+                                    <h6 class="mb-0">{{ color.name|default:"Unnamed" }}</h6>
+                                    <small class="text-muted">{{ color.hex_value }}</small>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-2">
+                                {{ color.notes.count }} note{{ color.notes.count|pluralize }}
+                            </p>
+                            <div>
+                                {% if not color.is_default %}
+                                    <a href="{% url 'notes:color_update' color.pk %}" class="btn btn-sm btn-outline-primary">Edit Name</a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Default</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <h4>No colors found</h4>
+                        <p class="text-muted">Colors will be created when you import notes.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

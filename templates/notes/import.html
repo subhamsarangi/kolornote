@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Notes - Notes PWA{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4>Import Notes</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.zip_file.id_for_label }}" class="form-label">ZIP File</label>
+                        {{ form.zip_file }}
+                        {% if form.zip_file.errors %}
+                            <div class="text-danger">{{ form.zip_file.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            Upload a ZIP file containing .txt files. The ZIP file name will be used as a color name.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                    <a href="{% url 'notes:list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Import Format</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Notes:</strong> Regular .txt files will be imported as notes.</p>
+                <p><strong>Checklists:</strong> .txt files with the following format will be imported as checklists:</p>
+                <pre class="bg-light p-2">[ ] Unchecked item
+[V] Checked item</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
