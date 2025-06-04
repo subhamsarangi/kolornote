@@ -4,7 +4,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
 
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "static"
 MEDIA_ROOT = "/home/kolornote/kolornote/media/"  # BASE_DIR / "media"
 
 DATABASES = {
