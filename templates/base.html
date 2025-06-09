@@ -21,17 +21,37 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
+            <!-- Brand -->
             <a class="navbar-brand" href="{% url 'notes:list' %}">Kolornote</a>
-            {% if user.is_authenticated %}
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{% url 'notes:list' %}">Notes</a>
-                <a class="nav-link" href="{% url 'notes:import' %}">Import</a>
-                <a class="nav-link" href="{% url 'notes:colors' %}">Colors</a>
-                <a class="nav-link" href="{% url 'notes:logout' %}">Logout</a>
+
+            <!-- Toggler (hamburger) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notes:list' %}">Notes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notes:import' %}">Import</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notes:colors' %}">Colors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notes:logout' %}">Logout</a>
+                    </li>
+                </ul>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </nav>
+
 
     <div class="container mt-4">
         {% if messages %}
