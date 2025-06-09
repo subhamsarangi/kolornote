@@ -1,40 +1,52 @@
-{% extends 'base.html' %}
-
-{% block title %}{{ note.title }} - Kolornote{% endblock %}
-
-{% block extracss %}
-<style>
-        #edit-btn, #add-btn {
-            background: #0c3766;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0 0 30px 0;
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .edit-btn {
+            background: #007bff;
             color: white;
-            border: 1px solid #0c3766;
         }
-        #edit-btn:hover, #add-btn:hover{
-            background: #fff;
-            color: #0c3766;
-            border-color: #0c3766;
-        }
-        #save-btn {
-            background: #0d6722;
+        .save-btn {
+            background: #28a745;
             color: white;
-            border: 1px solid #0d6722;
         }
-        #save-btn:hover{
-            background: #fff;
-            color: #0d6722;
-            border-color: #0d6722;
-        }
-        #cancel-btn {
-            background: #4d5156;
+        .cancel-btn {
+            background: #6c757d;
             color: white;
-            border: 1px solid #4d5156;
         }
-        #cancel-btn:hover{
-            background: #fff;
-            color: #4d5156;
-            border-color: #4d5156;
+        .add-btn {
+            background: #17a2b8;
+            color: white;
+            margin-bottom: 20px;
         }
-
         .checklist-item {
             display: flex;
             align-items: center;
@@ -46,13 +58,7 @@
         }
         .checklist-item.dragging {
             opacity: 0.5;
-            transform: scale(1.02);
-            background-color: #e0f7fa; /* Light cyan highlight */
-            border: 2px dashed #00796b;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 10;
         }
-
         .checklist-item input[type="checkbox"] {
             margin-right: 10px;
         }
@@ -62,12 +68,8 @@
         .remove-btn {
             background: #dc3545;
             color: white;
-            border: 1px solid #dc3545;
-        }
-        .remove-btn:hover{
-            background: #fff;
-            color: #dc3545;
-            border-color: #dc3545;
+            padding: 5px 10px;
+            font-size: 12px;
         }
         .view-mode .checklist-item {
             cursor: default;
@@ -77,10 +79,9 @@
         }
         .new-item {
             display: flex;
-            margin-top: 1em;
             margin-bottom: 20px;
         }
-        .new-item textarea {
+        .new-item input {
             flex: 1;
             padding: 8px;
             border: 1px solid #ddd;
@@ -90,78 +91,36 @@
         .hidden {
             display: none;
         }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="row">
-    <div class="col-md-10 mx-auto">
-        <div class="card" style="border-left: 4px solid {{ note.color.hex_value }};">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">{{ note.title }}</h4>
-                <span class="badge bg-secondary">{{ note.note_type|title }}</span>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Checklist Manager</h1>
+        
+        <div id="viewMode">
+            <button class="edit-btn" onclick="enterEditMode()">Edit Checklist</button>
+            <div id="checklistView"></div>
+        </div>
+        
+        <div id="editMode" class="hidden">
+            <button class="save-btn" onclick="saveChecklist()">Save</button>
+            <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+            
+            <div class="new-item">
+                <input type="text" id="newItemText" placeholder="Add new item...">
+                <button class="add-btn" onclick="addNewItem()">Add</button>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted">
-                        Color: {{ note.color.name|default:"Unnamed" }} •
-                        Created: {{ note.created_at|date:"M d, Y H:i" }} •
-                        Modified: {{ note.modified_at|date:"M d, Y H:i" }}
-                    </small>
-                </div>
-
-                <div class="content">
-                    {% if note.note_type == 'checklist' %}
-                    <div class="checklist">
-                        <div id="viewMode">
-                            <button id="edit-btn" class="btn btn-sm" onclick="enterEditMode()"><i class="fa fa-pencil"></i> Edit Checklist</button>
-                            <div id="checklistView"></div>
-                        </div>
-                        <div id="editMode" class="hidden">
-                            <button id="save-btn" class="btn btn-sm" onclick="saveChecklist()"><i class="fa fa-floppy-o"></i> Save</button>
-                            <button id="cancel-btn" class="btn btn-sm" onclick="cancelEdit()"><i class="fa fa-times"></i> Cancel</button>
-                            
-                            <!-- prepend -->
-                            <div class="new-item">
-                                <textarea name="newItemText" id="newItemText" placeholder="Add new item..."></textarea>
-                                <button id="add-btn" class="btn btn-sm" onclick="addNewItem()"><i class="fa fa-plus"></i> Add</button>
-                            </div>
-                            
-                            <div id="checklistEdit"></div>
-                            
-                            <!-- append -->
-                            <div class="new-item">
-                                <textarea name="newItemText" id="newItemText" placeholder="Add new item..."></textarea>
-                                <button id="add-btn" class="btn btn-sm" onclick="addNewItem()"><i class="fa fa-plus"></i> Add</button>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="note-content">
-                        {{ note.content|linebreaks }}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card-footer">
-                <a href="{% url 'notes:list' %}" class="btn btn-secondary">Back to Notes</a>
-            </div>
+            
+            <div id="checklistEdit"></div>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block extrajs %}
-<script>
-        var text = "{{ note.content|linebreaksbr|escapejs }}";
-        var checklistData = text
-            .replace(/\[\s*\]/g, '\n[ ]')
-            .replace(/\[V\]/g, '\n[V]')
-            .replace(/^\s*\n/, '')
-            .trim();
-
+    <script>
+        let checklistData = `[ ] Sample unchecked item
+[V] Sample checked item
+[ ] Another unchecked item`;
         console.log(checklistData);
-
+        
         let originalData = '';
 
         function parseChecklist(text) {
@@ -193,7 +152,7 @@
                 <div class="checklist-item" draggable="true" data-index="${index}">
                     <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${index})">
                     <span>${item.text}</span>
-                    <button class="remove-btn btn btn-sm" onclick="removeItem(${index})"><i class="fa fa-trash"></i></button>
+                    <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
                 </div>
             `).join('');
             document.getElementById('checklistEdit').innerHTML = html;
@@ -223,8 +182,7 @@
             const input = document.getElementById('newItemText');
             const text = input.value.trim();
             if (text) {
-                // checklistData += `\n[ ] ${text}`; # append
-                checklistData = `[ ] ${text}\n` + checklistData;  // Prepend
+                checklistData += `\n[ ] ${text}`;
                 input.value = '';
                 renderEditMode();
             }
@@ -282,13 +240,13 @@
             draggedIndex = null;
         }
 
-        // document.getElementById('newItemText').addEventListener('keypress', function(e) {
-        //     if (e.key === 'Enter') {
-        //         addNewItem();
-        //     }
-        // });
+        document.getElementById('newItemText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNewItem();
+            }
+        });
 
         renderViewMode();
-</script>
-
-{% endblock %}
+    </script>
+</body>
+</html>
