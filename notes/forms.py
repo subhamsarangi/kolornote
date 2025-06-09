@@ -17,9 +17,12 @@ class ImportForm(forms.Form):
 
 
 class ColorUpdateForm(forms.ModelForm):
-    """Form for updating color names"""
-
     class Meta:
         model = Color
-        fields = ["name"]
-        widgets = {"name": forms.TextInput(attrs={"class": "form-control"})}
+        fields = ["name", "hex_value"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "hex_value": forms.TextInput(
+                attrs={"type": "color", "class": "form-control form-control-color"}
+            ),
+        }

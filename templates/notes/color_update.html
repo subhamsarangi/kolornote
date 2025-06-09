@@ -16,13 +16,14 @@
                     </div>
                     <div>
                         <h6 class="mb-0">{{ object.hex_value }}</h6>
-                        <small class="text-muted">{{ object.notes.count }} note{{ object.notes.count|pluralize
-                            }}</small>
+                        <small class="text-muted">{{ object.notes.count }} note{{ object.notes.count|pluralize }}</small>
                     </div>
                 </div>
 
                 <form method="post">
                     {% csrf_token %}
+                    
+                    <!-- Color name input -->
                     <div class="mb-3">
                         <label for="{{ form.name.id_for_label }}" class="form-label">Color Name</label>
                         {{ form.name }}
@@ -30,9 +31,20 @@
                         <div class="text-danger">{{ form.name.errors }}</div>
                         {% endif %}
                     </div>
+
+                    <!-- Color hex picker input -->
+                    <div class="mb-3">
+                        <label for="{{ form.hex_value.id_for_label }}" class="form-label">Pick a Color</label>
+                        {{ form.hex_value }}
+                        {% if form.hex_value.errors %}
+                        <div class="text-danger">{{ form.hex_value.errors }}</div>
+                        {% endif %}
+                    </div>
+
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="{% url 'notes:colors' %}" class="btn btn-secondary">Cancel</a>
                 </form>
+
             </div>
         </div>
     </div>
