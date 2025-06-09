@@ -11,17 +11,23 @@
             </div>
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
-                    <div class="color-preview me-3"
-                        style="width: 40px; height: 40px; background-color: {{ object.hex_value }}; border: 1px solid #ddd; border-radius: 4px;">
+                    <div class="color-preview me-3" id="colorPreview"
+                        style="width: 60px; height: 60px; background-color: {{ object.hex_value }}; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; position: relative; transition: transform 0.2s ease;">
                     </div>
                     <div>
-                        <h6 class="mb-0">{{ object.hex_value }}</h6>
-                        <small class="text-muted">{{ object.notes.count }} note{{ object.notes.count|pluralize }}</small>
+                        <h6 class="mb-0" id="hexDisplay">{{ object.hex_value }}</h6>
+                        <small class="text-muted">Click the color box to change</small>
                     </div>
                 </div>
 
                 <form method="post">
                     {% csrf_token %}
+                    
+                    <!-- Hidden color hex input -->
+                    <input type="hidden" id="{{ form.hex_value.id_for_label }}" name="{{ form.hex_value.name }}" value="{{ object.hex_value }}">
+                    
+                    <!-- Invisible color picker -->
+                    <input type="color" id="colorPicker" style="opacity: 0; position: absolute; pointer-events: none;" value="{{ object.hex_value }}">
                     
                     <!-- Color name input -->
                     <div class="mb-3">
@@ -29,15 +35,6 @@
                         {{ form.name }}
                         {% if form.name.errors %}
                         <div class="text-danger">{{ form.name.errors }}</div>
-                        {% endif %}
-                    </div>
-
-                    <!-- Color hex picker input -->
-                    <div class="mb-3">
-                        <label for="{{ form.hex_value.id_for_label }}" class="form-label">Pick a Color</label>
-                        {{ form.hex_value }}
-                        {% if form.hex_value.errors %}
-                        <div class="text-danger">{{ form.hex_value.errors }}</div>
                         {% endif %}
                     </div>
 
@@ -49,4 +46,60 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extrajs %}
+<script>$(document).ready(function() {
+    const $colorPreview = $('#colorPreview');
+    const $colorPicker = $('#colorPicker');
+    const $hexDisplay = $('#hexDisplay');
+    const $hiddenInput = $('#{{ form.hex_value.id_for_label }}');
+    
+    $colorPreview.hover(
+        function() {
+            $(this).css({
+                'transform': 'scale(1.05)',
+                'border-color': '#007bff'
+            });
+        },
+        function() {
+            $(this).css({
+                'transform': 'scale(1)',
+                'border-color': '#ddd'
+            });
+        }
+    );
+    
+    $colorPreview.on('click', function() {
+        $colorPicker.trigger('click');
+    });
+    
+    function updateColor() {
+        const newColor = $colorPicker.val();
+        
+        $colorPreview.css('background-color', newColor);
+        
+        $hexDisplay.text(newColor.toUpperCase());
+        
+        // Update hidden form field
+        $hiddenInput.val(newColor);
+    }
+    
+    // real-time updates while selecting
+    $colorPicker.on('input', function() {
+        updateColor();
+    });
+    
+    // When selection is finalized
+    $colorPicker.on('change', function() {
+        updateColor();
+        
+        // A subtle animation to indicate final selection
+        $colorPreview.css('transform', 'scale(1.1)');
+        setTimeout(function() {
+            $colorPreview.css('transform', 'scale(1)');
+        }, 150);
+    });
+});
+</script>
 {% endblock %}
