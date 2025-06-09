@@ -244,7 +244,7 @@ function getCSRFToken() {
     return $('input[name="csrfmiddlewaretoken"]').val();
 }
 if ($(".checklist").length){
-    var text = "{{ note.content|linebreaksbr|escapejs }}";
+    var text = "{{ note.content|escapejs }}";
     var checklistData = text
         .replace(/\[\s*\]/g, '\n[ ]')
         .replace(/\[V\]/g, '\n[V]')
