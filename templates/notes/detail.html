@@ -65,6 +65,12 @@
     margin-top: 1em;
     margin-bottom: 20px;
 }
+.mx-auto{
+    padding: 0;
+}
+.card-body{
+    padding: 4px!important;
+}
 .checklist-item {
     display: flex;
     align-items: center;
@@ -98,9 +104,11 @@
     opacity: 0.5;
 }
 
-.checklist-text {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+.checklist-textarea {
+    width: 100%;
+    resize: vertical;
+    margin: 0 0.5em;
+    min-height: 30px;
 }
 
 .remove-btn {
@@ -237,7 +245,6 @@ function getCSRFToken() {
 }
 if ($(".checklist").length){
     var text = "{{ note.content|linebreaksbr|escapejs }}";
-    console.log(text);
     var checklistData = text
         .replace(/\[\s*\]/g, '\n[ ]')
         .replace(/\[V\]/g, '\n[V]')
@@ -269,13 +276,22 @@ if ($(".checklist").length){
         document.getElementById('checklistView').innerHTML = html;
     }
 
+    function updateItemText(index, newText) {
+        const items = parseChecklist(checklistData);
+        items[index].text = newText;
+        checklistData = serializeChecklist(items);
+    }
+
     function renderEditMode() {
         const items = parseChecklist(checklistData);
         const html = items.map((item, index) => `
             <div class="checklist-item" draggable="true" data-index="${index}">
                 <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${index})">
-                <span>${item.text}</span>
-                <button class="remove-btn btn btn-sm" onclick="removeItem(${index})"><i class="fa fa-trash"></i></button>
+                <textarea class="form-control form-control-sm checklist-textarea" 
+                        onchange="updateItemText(${index}, this.value)">${item.text}</textarea>
+                <button class="remove-btn btn btn-sm" onclick="removeItem(${index})">
+                    <i class="fa fa-trash"></i>
+                </button>
             </div>
         `).join('');
         document.getElementById('checklistEdit').innerHTML = html;
@@ -432,7 +448,6 @@ else {
         // Update backend via API submission
         const noteId = $('#noteEdit').data('note-id');
         const newText = $('#textNoteEdit').val().trim();
-        console.log(newText);
 
         $.ajax({
             url: `/notes/note/${noteId}/update/`,
