@@ -1,21 +1,25 @@
+import json
+import logging
 import os
 import re
 import zipfile
-import logging
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views import View
-from django.contrib.auth.views import LoginView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.decorators.http import require_POST
 
 from accounts.forms import EmailRegistrationForm, EmailLoginForm
-from .models import Note, Color
 from .forms import ImportForm, ColorUpdateForm
+from .models import Note, Color
 
 
 logger = logging.getLogger(__name__)
@@ -88,6 +92,24 @@ class NoteDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return Note.objects.filter(owner=self.request.user).select_related("color")
+
+
+@login_required
+@require_POST
+def update_note(request, pk):
+    try:
+        logger.debug(request.user, "----------------", pk)
+        note = Note.objects.get(pk=pk, owner=request.user)
+        data = json.loads(request.body)
+        note.content = data.get("content", note.content)
+        note.save()
+        return JsonResponse({"success": True, "message": "Data updated."})
+    except Note.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "message": "Data not found."}, status=404
+        )
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 
 class ImportNotesView(LoginRequiredMixin, View):

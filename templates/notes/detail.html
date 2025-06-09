@@ -145,6 +145,9 @@
 {% endblock %}
 
 {% block content %}
+<form style="display: none;">
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+</form>
 <div class="row">
     <div class="col-md-10 mx-auto">
         <div class="card" style="border-left: 4px solid {{ note.color.hex_value }};">
@@ -183,7 +186,7 @@
                                 <button id="prepend-btn" class="add-btn btn btn-sm" onclick="prependNewItem()"><i class="fa fa-plus"></i> Add</button>
                             </div>
                             
-                            <div id="checklistEdit"></div>
+                            <div id="checklistEdit" data-note-id="{{ note.pk }}"></div>
                             
                             <!-- append -->
                             <div class="new-item">
@@ -199,7 +202,7 @@
                                 <button class="edit-btn btn btn-sm" onclick="enterTextEditMode()">
                                 <i class="fa fa-pencil"></i> Edit Note</button>
                             </div>
-                            <div id="textNoteView">{{ note.content|linebreaks }}</div>
+                            <div id="textNoteView">{{ note.content }}</div>
                         </div>
                         <div id="editModeText" class="hidden">
                             <div class="sticky-buttons">
@@ -210,7 +213,7 @@
                                     <i class="fa fa-times"></i> Cancel
                                 </button>
                             </div>
-                            <div id="noteEdit">
+                            <div id="noteEdit" data-note-id="{{ note.pk }}">
                                 <textarea id="textNoteEdit" style="width: 100%; resize: vertical;">{{ note.content }}</textarea>
                             </div>
                         </div>
@@ -229,8 +232,12 @@
 
 {% block extrajs %}
 <script>
+function getCSRFToken() {
+    return $('input[name="csrfmiddlewaretoken"]').val();
+}
 if ($(".checklist").length){
     var text = "{{ note.content|linebreaksbr|escapejs }}";
+    console.log(text);
     var checklistData = text
         .replace(/\[\s*\]/g, '\n[ ]')
         .replace(/\[V\]/g, '\n[V]')
@@ -282,11 +289,50 @@ if ($(".checklist").length){
         renderEditMode();
     }
 
+    function sanitizeText(text) {
+        const div = document.createElement('div');
+        div.innerHTML = text;
+        return div.textContent.trim();
+    }
+
+    function getSanitizedChecklistData() {
+        const parsed = parseChecklist(checklistData);
+        return parsed.map(item => ({
+            text: sanitizeText(item.text),
+            checked: item.checked
+        }));
+    }
+
     function saveChecklist() {
-        // TODO: Update backend via API submission
-        document.getElementById('editMode').classList.add('hidden');
-        document.getElementById('viewMode').classList.remove('hidden');
-        renderViewMode();
+        // Update backend via API submission
+        const noteId =$('#checklistEdit').data('note-id');
+        
+        const cleanItems = getSanitizedChecklistData();
+        const cleanText = serializeChecklist(cleanItems);
+
+        $.ajax({
+            url: `/notes/note/${noteId}/update/`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ content: cleanText }),
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            },
+            success: function (response) {
+                if (response.success) {
+                    checklistData = cleanText; // update the global state
+                    $('#editMode').addClass('hidden');
+                    $('#viewMode').removeClass('hidden');
+                    renderViewMode();
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message || 'Failed to update checklist.');
+                }
+            },
+            error: function (xhr) {
+                toastr.error('Error saving checklist: ' + xhr.statusText);
+            }
+        });
     }
 
     function cancelEdit() {
@@ -369,7 +415,7 @@ if ($(".checklist").length){
 
     renderViewMode();   
 }
-else{
+else {
     let originalTextContent = '';
 
     function enterTextEditMode() {
@@ -383,13 +429,33 @@ else{
     }
 
     function saveTextNote() {
-        const newText = document.getElementById('textNoteEdit').value;
+        // Update backend via API submission
+        const noteId = $('#noteEdit').data('note-id');
+        const newText = $('#textNoteEdit').val().trim();
+        console.log(newText);
 
-        // TODO: Update backend via APIS submission
-
-        document.getElementById('textNoteView').innerText = newText;
-        document.getElementById('editModeText').classList.add('hidden');
-        document.getElementById('viewModeText').classList.remove('hidden');
+        $.ajax({
+            url: `/notes/note/${noteId}/update/`,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ content: newText }),
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#textNoteView').text(newText);
+                    $('#editModeText').addClass('hidden');
+                    $('#viewModeText').removeClass('hidden');
+                    toastr.success(response.message);
+                } else {
+                    toastr.error(response.message || 'Failed to update note.');
+                }
+            },
+            error: function (xhr) {
+                toastr.error('Error saving note: ' + xhr.statusText);
+            }
+        });
     }
 
     function cancelTextEdit() {
@@ -397,15 +463,9 @@ else{
         document.getElementById('editModeText').classList.add('hidden');
         document.getElementById('viewModeText').classList.remove('hidden');
     }
-
-    function autoGrow(el) {
-        el.style.height = "5px";
-        el.style.height = (el.scrollHeight) + "px";
-    }
     
     function adjustTextareaRows() {
         const textarea = document.getElementById('textNoteEdit');
-        textarea.addEventListener('input', () => autoGrow(textarea));
         const lineHeight = 20; // px
         const availableHeight = window.innerHeight * 0.6; // 60% of viewport height
         const rows = Math.floor(availableHeight / lineHeight);
