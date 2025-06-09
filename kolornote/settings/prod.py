@@ -4,9 +4,12 @@ DEBUG = False
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(",")
 
-STATIC_ROOT = BASE_DIR / "static"
-MEDIA_ROOT = "/home/kolornote/kolornote/media/"  # BASE_DIR / "media"
+MEDIA_ROOT = "/home/kolornote/kolornote/media/"
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+
 
 DATABASES = {
     "default": {
