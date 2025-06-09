@@ -4,92 +4,143 @@
 
 {% block extracss %}
 <style>
-        #edit-btn, #add-btn {
-            background: #0c3766;
-            color: white;
-            border: 1px solid #0c3766;
-        }
-        #edit-btn:hover, #add-btn:hover{
-            background: #fff;
-            color: #0c3766;
-            border-color: #0c3766;
-        }
-        #save-btn {
-            background: #0d6722;
-            color: white;
-            border: 1px solid #0d6722;
-        }
-        #save-btn:hover{
-            background: #fff;
-            color: #0d6722;
-            border-color: #0d6722;
-        }
-        #cancel-btn {
-            background: #4d5156;
-            color: white;
-            border: 1px solid #4d5156;
-        }
-        #cancel-btn:hover{
-            background: #fff;
-            color: #4d5156;
-            border-color: #4d5156;
-        }
+.edit-btn, .add-btn {
+    background: #0c3766;
+    color: white;
+    border: 1px solid #0c3766;
+}
+.edit-btn:hover, .add-btn:hover{
+    background: #fff;
+    color: #0c3766;
+    border-color: #0c3766;
+}
 
-        .checklist-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9fa;
-            border-radius: 4px;
-            cursor: grab;
-        }
-        .checklist-item.dragging {
-            opacity: 0.5;
-            transform: scale(1.02);
-            background-color: #e0f7fa; /* Light cyan highlight */
-            border: 2px dashed #00796b;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-        }
+.save-btn {
+    background: #0d6722;
+    color: white;
+    border: 1px solid #0d6722;
+}
+.save-btn:hover{
+    background: #fff;
+    color: #0d6722;
+    border-color: #0d6722;
+}
+.cancel-btn {
+    background: #4d5156;
+    color: white;
+    border: 1px solid #4d5156;
+}
+.cancel-btn:hover{
+    background: #fff;
+    color: #4d5156;
+    border-color: #4d5156;
+}
+.sticky-buttons {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1rem 0 1.5rem 0;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .checklist-item input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        .checklist-item span {
-            flex: 1;
-        }
-        .remove-btn {
-            background: #dc3545;
-            color: white;
-            border: 1px solid #dc3545;
-        }
-        .remove-btn:hover{
-            background: #fff;
-            color: #dc3545;
-            border-color: #dc3545;
-        }
-        .view-mode .checklist-item {
-            cursor: default;
-        }
-        .view-mode .remove-btn {
-            display: none;
-        }
-        .new-item {
-            display: flex;
-            margin-top: 1em;
-            margin-bottom: 20px;
-        }
-        .new-item textarea {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        .hidden {
-            display: none;
-        }
+.sticky-buttons:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.content {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+#textNoteView {
+    white-space: pre-wrap;
+}
+#noteEdit{
+    margin-top: 1em;
+    margin-bottom: 20px;
+}
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: grab;
+}
+.checklist-item.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    background-color: #e0f7fa; /* Light cyan highlight */
+    border: 2px dashed #00796b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.checklist-item input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 0.75rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+.checklist-item span {
+    flex: 1;
+    line-height: 1.4;
+}
+.checklist-item input:checked+label {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.checklist-text {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+}
+.remove-btn:hover{
+    background: #fff;
+    color: #dc3545;
+    border-color: #dc3545;
+}
+.view-mode .checklist-item {
+    cursor: default;
+}
+.view-mode .remove-btn {
+    display: none;
+}
+.new-item {
+    display: flex;
+    margin-top: 1em;
+    margin-bottom: 20px;
+}
+.new-item textarea {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+  .sticky-buttons {
+    padding: 0.75rem 0 1rem 0;
+    margin-bottom: 0.75rem;
+  }
+}
 </style>
 {% endblock %}
 
@@ -99,12 +150,14 @@
         <div class="card" style="border-left: 4px solid {{ note.color.hex_value }};">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">{{ note.title }}</h4>
-                <span class="badge bg-secondary">{{ note.note_type|title }}</span>
+                <span>
+                    <span class="badge bg-secondary">{{ note.note_type|title }}</span>
+                    <span class="badge" style="background: {{ note.color.hex_value }};">{{ note.color.name|default:"Unnamed" }}</span>
+                </span>
             </div>
             <div class="card-body">
                 <div class="mb-3">
                     <small class="text-muted">
-                        Color: {{ note.color.name|default:"Unnamed" }} •
                         Created: {{ note.created_at|date:"M d, Y H:i" }} •
                         Modified: {{ note.modified_at|date:"M d, Y H:i" }}
                     </small>
@@ -114,33 +167,56 @@
                     {% if note.note_type == 'checklist' %}
                     <div class="checklist">
                         <div id="viewMode">
-                            <button id="edit-btn" class="btn btn-sm" onclick="enterEditMode()"><i class="fa fa-pencil"></i> Edit Checklist</button>
+                            <div class="sticky-buttons">
+                                <button class="edit-btn btn btn-sm" onclick="enterEditMode()"><i class="fa fa-pencil"></i> Edit Checklist</button>
+                            </div>
                             <div id="checklistView"></div>
                         </div>
                         <div id="editMode" class="hidden">
-                            <button id="save-btn" class="btn btn-sm" onclick="saveChecklist()"><i class="fa fa-floppy-o"></i> Save</button>
-                            <button id="cancel-btn" class="btn btn-sm" onclick="cancelEdit()"><i class="fa fa-times"></i> Cancel</button>
-                            
+                            <div class="sticky-buttons">
+                                <button class="save-btn btn btn-sm" onclick="saveChecklist()"><i class="fa fa-floppy-o"></i> Save</button>
+                                <button class="cancel-btn btn btn-sm" onclick="cancelEdit()"><i class="fa fa-times"></i> Cancel</button>
+                            </div>
                             <!-- prepend -->
                             <div class="new-item">
-                                <textarea name="newItemText" id="newItemText" placeholder="Add new item..."></textarea>
-                                <button id="add-btn" class="btn btn-sm" onclick="addNewItem()"><i class="fa fa-plus"></i> Add</button>
+                                <textarea name="prependItemText" id="prependItemText" placeholder="Add new item (top)..."></textarea>
+                                <button id="prepend-btn" class="add-btn btn btn-sm" onclick="prependNewItem()"><i class="fa fa-plus"></i> Add</button>
                             </div>
                             
                             <div id="checklistEdit"></div>
                             
                             <!-- append -->
                             <div class="new-item">
-                                <textarea name="newItemText" id="newItemText" placeholder="Add new item..."></textarea>
-                                <button id="add-btn" class="btn btn-sm" onclick="addNewItem()"><i class="fa fa-plus"></i> Add</button>
+                                <textarea name="appendItemText" id="appendItemText" placeholder="Add new item (bottom)..."></textarea>
+                                <button id="append-btn" class="add-btn btn btn-sm" onclick="appendNewItem()"><i class="fa fa-plus"></i> Add</button>
                             </div>
                         </div>
                     </div>
                     {% else %}
-                    <div class="note-content">
-                        {{ note.content|linebreaks }}
+                    <div class="note">
+                        <div id="viewModeText">
+                            <div class="sticky-buttons">
+                                <button class="edit-btn btn btn-sm" onclick="enterTextEditMode()">
+                                <i class="fa fa-pencil"></i> Edit Note</button>
+                            </div>
+                            <div id="textNoteView">{{ note.content|linebreaks }}</div>
+                        </div>
+                        <div id="editModeText" class="hidden">
+                            <div class="sticky-buttons">
+                                <button class="save-btn btn btn-sm" onclick="saveTextNote()">
+                                    <i class="fa fa-floppy-o"></i> Save
+                                </button>
+                                <button class="cancel-btn btn btn-sm" onclick="cancelTextEdit()">
+                                    <i class="fa fa-times"></i> Cancel
+                                </button>
+                            </div>
+                            <div id="noteEdit">
+                                <textarea id="textNoteEdit" style="width: 100%; resize: vertical;">{{ note.content }}</textarea>
+                            </div>
+                        </div>
                     </div>
                     {% endif %}
+
                 </div>
             </div>
             <div class="card-footer">
@@ -153,142 +229,192 @@
 
 {% block extrajs %}
 <script>
-        var text = "{{ note.content|linebreaksbr|escapejs }}";
-        var checklistData = text
-            .replace(/\[\s*\]/g, '\n[ ]')
-            .replace(/\[V\]/g, '\n[V]')
-            .replace(/^\s*\n/, '')
-            .trim();
+if ($(".checklist").length){
+    var text = "{{ note.content|linebreaksbr|escapejs }}";
+    var checklistData = text
+        .replace(/\[\s*\]/g, '\n[ ]')
+        .replace(/\[V\]/g, '\n[V]')
+        .replace(/^\s*\n/, '')
+        .trim();
 
-        console.log(checklistData);
+    let originalData = '';
 
-        let originalData = '';
+    function parseChecklist(text) {
+        return text.split('\n').filter(line => line.trim()).map(line => {
+            const checked = line.startsWith('[V]');
+            const text = line.substring(3).trim();
+            return { checked, text };
+        });
+    }
 
-        function parseChecklist(text) {
-            return text.split('\n').filter(line => line.trim()).map(line => {
-                const checked = line.startsWith('[V]');
-                const text = line.substring(3).trim();
-                return { checked, text };
-            });
-        }
+    function serializeChecklist(items) {
+        return items.map(item => `[${item.checked ? 'V' : ' '}] ${item.text}`).join('\n');
+    }
 
-        function serializeChecklist(items) {
-            return items.map(item => `[${item.checked ? 'V' : ' '}] ${item.text}`).join('\n');
-        }
+    function renderViewMode() {
+        const items = parseChecklist(checklistData);
+        const html = items.map(item => `
+            <div class="checklist-item">
+                <input type="checkbox" ${item.checked ? 'checked' : ''} disabled>
+                <span>${item.text}</span>
+            </div>
+        `).join('');
+        document.getElementById('checklistView').innerHTML = html;
+    }
 
-        function renderViewMode() {
-            const items = parseChecklist(checklistData);
-            const html = items.map(item => `
-                <div class="checklist-item">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} disabled>
-                    <span>${item.text}</span>
-                </div>
-            `).join('');
-            document.getElementById('checklistView').innerHTML = html;
-        }
+    function renderEditMode() {
+        const items = parseChecklist(checklistData);
+        const html = items.map((item, index) => `
+            <div class="checklist-item" draggable="true" data-index="${index}">
+                <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${index})">
+                <span>${item.text}</span>
+                <button class="remove-btn btn btn-sm" onclick="removeItem(${index})"><i class="fa fa-trash"></i></button>
+            </div>
+        `).join('');
+        document.getElementById('checklistEdit').innerHTML = html;
+        addDragListeners();
+    }
 
-        function renderEditMode() {
-            const items = parseChecklist(checklistData);
-            const html = items.map((item, index) => `
-                <div class="checklist-item" draggable="true" data-index="${index}">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${index})">
-                    <span>${item.text}</span>
-                    <button class="remove-btn btn btn-sm" onclick="removeItem(${index})"><i class="fa fa-trash"></i></button>
-                </div>
-            `).join('');
-            document.getElementById('checklistEdit').innerHTML = html;
-            addDragListeners();
-        }
+    function enterEditMode() {
+        originalData = checklistData;
+        document.getElementById('viewMode').classList.add('hidden');
+        document.getElementById('editMode').classList.remove('hidden');
+        renderEditMode();
+    }
 
-        function enterEditMode() {
-            originalData = checklistData;
-            document.getElementById('viewMode').classList.add('hidden');
-            document.getElementById('editMode').classList.remove('hidden');
-            renderEditMode();
-        }
-
-        function saveChecklist() {
-            document.getElementById('editMode').classList.add('hidden');
-            document.getElementById('viewMode').classList.remove('hidden');
-            renderViewMode();
-        }
-
-        function cancelEdit() {
-            checklistData = originalData;
-            document.getElementById('editMode').classList.add('hidden');
-            document.getElementById('viewMode').classList.remove('hidden');
-        }
-
-        function addNewItem() {
-            const input = document.getElementById('newItemText');
-            const text = input.value.trim();
-            if (text) {
-                // checklistData += `\n[ ] ${text}`; # append
-                checklistData = `[ ] ${text}\n` + checklistData;  // Prepend
-                input.value = '';
-                renderEditMode();
-            }
-        }
-
-        function toggleItem(index) {
-            const items = parseChecklist(checklistData);
-            items[index].checked = !items[index].checked;
-            checklistData = serializeChecklist(items);
-        }
-
-        function removeItem(index) {
-            const items = parseChecklist(checklistData);
-            items.splice(index, 1);
-            checklistData = serializeChecklist(items);
-            renderEditMode();
-        }
-
-        function addDragListeners() {
-            const items = document.querySelectorAll('.checklist-item[draggable="true"]');
-            items.forEach(item => {
-                item.addEventListener('dragstart', handleDragStart);
-                item.addEventListener('dragover', handleDragOver);
-                item.addEventListener('drop', handleDrop);
-                item.addEventListener('dragend', handleDragEnd);
-            });
-        }
-
-        let draggedIndex = null;
-
-        function handleDragStart(e) {
-            draggedIndex = parseInt(e.target.dataset.index);
-            e.target.classList.add('dragging');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            const targetIndex = parseInt(e.target.closest('.checklist-item').dataset.index);
-            
-            if (draggedIndex !== null && draggedIndex !== targetIndex) {
-                const items = parseChecklist(checklistData);
-                const draggedItem = items.splice(draggedIndex, 1)[0];
-                items.splice(targetIndex, 0, draggedItem);
-                checklistData = serializeChecklist(items);
-                renderEditMode();
-            }
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            draggedIndex = null;
-        }
-
-        // document.getElementById('newItemText').addEventListener('keypress', function(e) {
-        //     if (e.key === 'Enter') {
-        //         addNewItem();
-        //     }
-        // });
-
+    function saveChecklist() {
+        // TODO: Update backend via API submission
+        document.getElementById('editMode').classList.add('hidden');
+        document.getElementById('viewMode').classList.remove('hidden');
         renderViewMode();
+    }
+
+    function cancelEdit() {
+        checklistData = originalData;
+        document.getElementById('editMode').classList.add('hidden');
+        document.getElementById('viewMode').classList.remove('hidden');
+    }
+
+    function prependNewItem() {
+        const input = document.getElementById('prependItemText');
+        const text = input.value.trim();
+        if (text) {
+            checklistData = `[ ] ${text}\n` + checklistData;  // Prepend
+            input.value = '';
+            renderEditMode();
+        }
+    }
+
+    function appendNewItem() {
+        const input = document.getElementById('appendItemText');
+        const text = input.value.trim();
+        if (text) {
+            checklistData = checklistData + `\n[ ] ${text}`; // append
+            input.value = '';
+            renderEditMode();
+        }
+    }
+
+    function toggleItem(index) {
+        const items = parseChecklist(checklistData);
+        items[index].checked = !items[index].checked;
+        checklistData = serializeChecklist(items);
+    }
+
+    function removeItem(index) {
+        const items = parseChecklist(checklistData);
+        items.splice(index, 1);
+        checklistData = serializeChecklist(items);
+        renderEditMode();
+    }
+
+    function addDragListeners() {
+        const items = document.querySelectorAll('.checklist-item[draggable="true"]');
+        items.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('drop', handleDrop);
+            item.addEventListener('dragend', handleDragEnd);
+        });
+    }
+
+    let draggedIndex = null;
+
+    function handleDragStart(e) {
+        draggedIndex = parseInt(e.target.dataset.index);
+        e.target.classList.add('dragging');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const targetIndex = parseInt(e.target.closest('.checklist-item').dataset.index);
+        
+        if (draggedIndex !== null && draggedIndex !== targetIndex) {
+            const items = parseChecklist(checklistData);
+            const draggedItem = items.splice(draggedIndex, 1)[0];
+            items.splice(targetIndex, 0, draggedItem);
+            checklistData = serializeChecklist(items);
+            renderEditMode();
+        }
+    }
+
+    function handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        draggedIndex = null;
+    }
+
+    renderViewMode();   
+}
+else{
+    let originalTextContent = '';
+
+    function enterTextEditMode() {
+        const viewDiv = document.getElementById('textNoteView');
+        originalTextContent = viewDiv.innerText.trim();
+
+        document.getElementById('viewModeText').classList.add('hidden');
+        document.getElementById('editModeText').classList.remove('hidden');
+
+        document.getElementById('textNoteEdit').value = originalTextContent;
+    }
+
+    function saveTextNote() {
+        const newText = document.getElementById('textNoteEdit').value;
+
+        // TODO: Update backend via APIS submission
+
+        document.getElementById('textNoteView').innerText = newText;
+        document.getElementById('editModeText').classList.add('hidden');
+        document.getElementById('viewModeText').classList.remove('hidden');
+    }
+
+    function cancelTextEdit() {
+        document.getElementById('textNoteEdit').value = originalTextContent;
+        document.getElementById('editModeText').classList.add('hidden');
+        document.getElementById('viewModeText').classList.remove('hidden');
+    }
+
+    function autoGrow(el) {
+        el.style.height = "5px";
+        el.style.height = (el.scrollHeight) + "px";
+    }
+    
+    function adjustTextareaRows() {
+        const textarea = document.getElementById('textNoteEdit');
+        textarea.addEventListener('input', () => autoGrow(textarea));
+        const lineHeight = 20; // px
+        const availableHeight = window.innerHeight * 0.6; // 60% of viewport height
+        const rows = Math.floor(availableHeight / lineHeight);
+        textarea.rows = rows;
+    }
+
+    window.addEventListener('resize', adjustTextareaRows);
+    window.addEventListener('load', adjustTextareaRows);
+}
 </script>
 
 {% endblock %}

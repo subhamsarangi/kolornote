@@ -46,19 +46,21 @@
         <div class="row">
             {% for note in notes %}
             <div class="col-md-6 col-lg-4 mb-3">
-                <div class="card note-card" style="border-left: 4px solid {{ note.color.hex_value }};">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ note.title }}</h5>
-                        <p class="card-text text-muted small">
-                            {{ note.note_type|title }} • {{ note.color.name|default:"Unnamed" }}
-                        </p>
-                        <p class="card-text">{{ note.content|truncatewords:10 }}</p>
-                        <small class="text-muted">{{ note.modified_at|date:"M d, Y" }}</small>
-                        <div class="mt-2">
-                            <a href="{% url 'notes:detail' note.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                <a href="{% url 'notes:detail' note.pk %}" class="note-card-link">
+                    <div class="card note-card" style="border-left: 4px solid {{ note.color.hex_value }};">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ note.title }}</h5>
+                            <p class="card-text text-muted small">
+                                {{ note.note_type|title }} • {{ note.color.name|default:"Unnamed" }}
+                            </p>
+                            <p class="card-text">{{ note.content|truncatewords:10 }}</p>
+                            <small class="text-muted">{{ note.modified_at|date:"M d, Y" }}</small>
+                            <!-- <div class="mt-2">
+                                <a href="{% url 'notes:detail' note.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                            </div> -->
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
             {% empty %}
             <div class="col-12">
