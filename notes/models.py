@@ -32,7 +32,7 @@ class Color(models.Model):
     def create_default_color(cls, user):
         """Create default white color for user"""
         return cls.objects.create(
-            owner=user, name="Default", hex_value="#ffffff", is_default=True
+            owner=user, name="Default", hex_value="#eeeeee", is_default=True
         )
 
     @classmethod

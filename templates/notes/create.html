@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+
+{% block title %}Create {{ note_type|title }} - Kolornote{% endblock %}
+
+{% block extracss %}
+<style>
+.edit-btn, .add-btn {
+    background: #0c3766;
+    color: white;
+    border: 1px solid #0c3766;
+}
+.edit-btn:hover, .add-btn:hover{
+    background: #fff;
+    color: #0c3766;
+    border-color: #0c3766;
+}
+
+.save-btn {
+    background: #0d6722;
+    color: white;
+    border: 1px solid #0d6722;
+}
+.save-btn:hover{
+    background: #fff;
+    color: #0d6722;
+    border-color: #0d6722;
+}
+
+.sticky-buttons {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1rem 0 1.5rem 0;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sticky-buttons:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.content {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+#textNoteCreate {
+    width: 100%;
+    resize: vertical;
+    min-height: 300px;
+}
+
+.mx-auto{
+    padding: 0;
+}
+.card-body{
+    padding: 4px!important;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: grab;
+}
+
+.checklist-item.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    background-color: #e0f7fa;
+    border: 2px dashed #00796b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.checklist-item input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 0.75rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.checklist-item span {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.checklist-textarea {
+    width: 100%;
+    resize: vertical;
+    margin: 0 0.5em;
+    min-height: 30px;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+}
+.remove-btn:hover{
+    background: #fff;
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.new-item {
+    display: flex;
+    margin-top: 1em;
+    margin-bottom: 20px;
+}
+
+.new-item textarea {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.color-option {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: 5px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: #000;
+    transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+  .sticky-buttons {
+    padding: 0.75rem 0 1rem 0;
+    margin-bottom: 0.75rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="createForm">
+  {% csrf_token %}
+  <div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card" id="noteCard" style="border-left: 4px solid #0c3766;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Create {{ note_type|title }}</h4>
+                <span class="badge bg-secondary">{{ note_type|title }}</span>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter title..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Color</label>
+                    <div>
+                        {% for color in colors %}
+                        <span class="color-option" 
+                              data-color-id="{{ color.id }}" 
+                              data-color-hex="{{ color.hex_value }}"
+                              style="background-color: {{ color.hex_value }};"
+                              title="{{ color.name }}"></span>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="selectedColor" name="color" value="{{ colors.0.id }}">
+                </div>
+
+                <div class="content">
+                    {% if note_type == 'checklist' %}
+                    <div class="checklist">
+                        <div class="sticky-buttons">
+                            <button type="submit" class="save-btn btn btn-sm">
+                                <i class="fa fa-floppy-o"></i> Create Checklist
+                            </button>
+                            <a href="{% url 'notes:list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fa fa-times"></i> Cancel
+                            </a>
+                        </div>
+                        
+                        <div class="new-item">
+                            <textarea id="newItemText" placeholder="Add checklist item..."></textarea>
+                            <button type="button" class="add-btn btn btn-sm" onclick="addNewItem()">
+                                <i class="fa fa-plus"></i> Add
+                            </button>
+                        </div>
+                        
+                        <div id="checklistItems"></div>
+                        
+                        <textarea id="checklistContent" name="content" style="display: none;"></textarea>
+                    </div>
+                    {% else %}
+                    <div class="note">
+                        <div class="sticky-buttons">
+                            <button type="submit" class="save-btn btn btn-sm">
+                                <i class="fa fa-floppy-o"></i> Create Note
+                            </button>
+                            <a href="{% url 'notes:list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fa fa-times"></i> Cancel
+                            </a>
+                        </div>
+                        
+                        <div class="form-group">
+                            <textarea id="textNoteCreate" name="content" placeholder="Start writing your note..."></textarea>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+// Color selection
+$('.color-option').click(function() {
+    $('.color-option').removeClass('selected');
+    $(this).addClass('selected');
+    $('#selectedColor').val($(this).data('color-id'));
+    $('#noteCard').css('border-left-color', $(this).data('color-hex'));
+});
+
+// Set default color selection
+$('.color-option').first().addClass('selected');
+
+{% if note_type == 'checklist' %}
+let checklistData = [];
+
+function parseChecklist(text) {
+    return text.split('\n').filter(line => line.trim()).map(line => {
+        const checked = line.startsWith('[V]');
+        const text = line.substring(3).trim();
+        return { checked, text };
+    });
+}
+
+function serializeChecklist(items) {
+    return items.map(item => `[${item.checked ? 'V' : ' '}] ${item.text}`).join('\n');
+}
+
+function renderChecklistItems() {
+    const html = checklistData.map((item, index) => `
+        <div class="checklist-item" draggable="true" data-index="${index}">
+            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${index})">
+            <textarea class="form-control form-control-sm checklist-textarea" 
+                    onchange="updateItemText(${index}, this.value)">${item.text}</textarea>
+            <button type="button" class="remove-btn btn btn-sm" onclick="removeItem(${index})">
+                <i class="fa fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+    document.getElementById('checklistItems').innerHTML = html;
+    addDragListeners();
+    updateHiddenField();
+}
+
+function addNewItem() {
+    const input = document.getElementById('newItemText');
+    const text = input.value.trim();
+    if (text) {
+        checklistData.push({ checked: false, text: text });
+        input.value = '';
+        renderChecklistItems();
+    }
+}
+
+function updateItemText(index, newText) {
+    checklistData[index].text = newText;
+    updateHiddenField();
+}
+
+function toggleItem(index) {
+    checklistData[index].checked = !checklistData[index].checked;
+    updateHiddenField();
+}
+
+function removeItem(index) {
+    checklistData.splice(index, 1);
+    renderChecklistItems();
+}
+
+function updateHiddenField() {
+    document.getElementById('checklistContent').value = serializeChecklist(checklistData);
+}
+
+function addDragListeners() {
+    const items = document.querySelectorAll('.checklist-item[draggable="true"]');
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+}
+
+let draggedIndex = null;
+
+function handleDragStart(e) {
+    draggedIndex = parseInt(e.target.dataset.index);
+    e.target.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const targetIndex = parseInt(e.target.closest('.checklist-item').dataset.index);
+    
+    if (draggedIndex !== null && draggedIndex !== targetIndex) {
+        const draggedItem = checklistData.splice(draggedIndex, 1)[0];
+        checklistData.splice(targetIndex, 0, draggedItem);
+        renderChecklistItems();
+    }
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    draggedIndex = null;
+}
+
+// Add item on Enter key
+$('#newItemText').keypress(function(e) {
+    if (e.which == 13 && !e.shiftKey) {
+        e.preventDefault();
+        addNewItem();
+    }
+});
+
+{% else %}
+function adjustTextareaRows() {
+    const textarea = document.getElementById('textNoteCreate');
+    const lineHeight = 20;
+    const availableHeight = window.innerHeight * 0.6;
+    const rows = Math.floor(availableHeight / lineHeight);
+    textarea.rows = rows;
+}
+
+window.addEventListener('resize', adjustTextareaRows);
+window.addEventListener('load', adjustTextareaRows);
+{% endif %}
+
+// Form validation
+$('#createForm').submit(function(e) {
+    const title = $('#title').val().trim();
+    if (!title) {
+        e.preventDefault();
+        toastr.error('Please enter a title');
+        return false;
+    }
+    
+    {% if note_type == 'checklist' %}
+    if (checklistData.length === 0) {
+        e.preventDefault();
+        toastr.error('Please add at least one checklist item');
+        return false;
+    }
+    {% else %}
+    const content = $('#textNoteCreate').val().trim();
+    if (!content) {
+        e.preventDefault();
+        toastr.error('Please enter some content');
+        return false;
+    }
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -94,6 +94,33 @@ class NoteDetailView(LoginRequiredMixin, DetailView):
         return Note.objects.filter(owner=self.request.user).select_related("color")
 
 
+class NoteCreateView(LoginRequiredMixin, CreateView):
+    """Create new note or checklist"""
+
+    model = Note
+    fields = ["title", "content", "color"]
+    template_name = "notes/create.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["colors"] = Color.objects.all()
+        context["note_type"] = self.kwargs.get("note_type", "note")
+        return context
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        form.instance.note_type = self.kwargs.get("note_type", "note")
+
+        response = super().form_valid(form)
+        messages.success(
+            self.request, f"{form.instance.note_type.title()} created successfully!"
+        )
+        return response
+
+    def get_success_url(self):
+        return reverse_lazy("notes:detail", kwargs={"pk": self.object.pk})
+
+
 @login_required
 @require_POST
 def update_note(request, pk):
