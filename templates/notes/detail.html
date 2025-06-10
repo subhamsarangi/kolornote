@@ -133,6 +133,7 @@
     display: flex;
     margin-top: 1em;
     margin-bottom: 20px;
+    align-items: center;
 }
 .new-item textarea {
     flex: 1;
@@ -140,6 +141,25 @@
     border: 1px solid #666;
     border-radius: 4px;
     margin-right: 10px;
+}
+/* Style clear button */
+.clear-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 10px;
+    padding: 0 6px;
+    line-height: 1;
+}
+
+.clear-btn:hover {
+    color: #333;
+}
+.clear-btn:disabled {
+    color: #bbb;
+    cursor: not-allowed;
 }
 .hidden {
     display: none;
@@ -193,6 +213,9 @@
                             <!-- prepend -->
                             <div class="new-item">
                                 <textarea name="prependItemText" id="prependItemText" placeholder="Add new item (top)..."></textarea>
+                                <button disabled type="button" class="clear-btn clear-btn-prepend btn btn-sm" onclick="clearText()">
+                                    <i class="fa fa-times"></i>
+                                </button>
                                 <button id="prepend-btn" class="add-btn btn btn-sm" onclick="prependNewItem()"><i class="fa fa-plus"></i> Add</button>
                             </div>
                             
@@ -201,6 +224,9 @@
                             <!-- append -->
                             <div class="new-item">
                                 <textarea name="appendItemText" id="appendItemText" placeholder="Add new item (bottom)..."></textarea>
+                                <button disabled type="button" class="clear-btn clear-btn-append btn btn-sm" onclick="clearText()">
+                                    <i class="fa fa-times"></i>
+                                </button>
                                 <button id="append-btn" class="add-btn btn btn-sm" onclick="appendNewItem()"><i class="fa fa-plus"></i> Add</button>
                             </div>
                         </div>
@@ -245,7 +271,32 @@
 function getCSRFToken() {
     return $('input[name="csrfmiddlewaretoken"]').val();
 }
+
 if ($(".checklist").length){
+
+    const textarea1 = document.getElementById("prependItemText");
+    const textarea2 = document.getElementById("appendItemText");
+    const clearBtn1 = document.querySelector(".clear-btn-prepend");
+    const clearBtn2 = document.querySelector(".clear-btn-append");
+
+    textarea1.addEventListener("input", () => {
+        clearBtn1.disabled = textarea1.value.trim() === "";
+    });
+    textarea2.addEventListener("input", () => {
+        clearBtn2.disabled = textarea2.value.trim() === "";
+    });
+
+    function clearText1() {
+        textarea1.value = "";
+        clearBtn1.disabled = true;
+        textarea1.focus();
+    }
+    function clearText2() {
+        textarea2.value = "";
+        clearBtn2.disabled = true;
+        textarea2.focus();
+    }
+
     var text = "{{ note.content|escapejs }}";
     var checklistData = text
         .replace(/\[\s*\]/g, '\n[ ]')

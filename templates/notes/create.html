@@ -113,6 +113,7 @@
 
 .new-item {
     display: flex;
+    align-items: center;
     margin-top: 1em;
     margin-bottom: 20px;
 }
@@ -123,6 +124,25 @@
     border: 1px solid #666;
     border-radius: 4px;
     margin-right: 10px;
+}
+/* Style clear button */
+.clear-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-right: 10px;
+    padding: 0 6px;
+    line-height: 1;
+}
+
+.clear-btn:hover {
+    color: #333;
+}
+.clear-btn:disabled {
+    color: #bbb;
+    cursor: not-allowed;
 }
 
 .form-group {
@@ -140,6 +160,7 @@
     display: inline-flex;
     flex-flow: column;
     padding-right: 1em;
+    align-items: center;
 }
 .color-option {
     display: inline-block;
@@ -213,6 +234,9 @@
                     <div class="checklist">
                         <div class="new-item">
                             <textarea id="newItemText" placeholder="Add checklist item..."></textarea>
+                            <button disabled type="button" class="clear-btn btn btn-sm" onclick="clearText()">
+                                <i class="fa fa-times"></i>
+                            </button>
                             <button type="button" class="add-btn btn btn-sm" onclick="addNewItem()">
                                 <i class="fa fa-plus"></i> Add
                             </button>
@@ -257,6 +281,19 @@
 
 {% block extrajs %}
 <script>
+const textarea = document.getElementById("newItemText");
+const clearBtn = document.querySelector(".clear-btn");
+
+textarea.addEventListener("input", () => {
+    clearBtn.disabled = textarea.value.trim() === "";
+});
+
+function clearText() {
+    textarea.value = "";
+    clearBtn.disabled = true;
+    textarea.focus();
+}
+
 // Color selection
 $('.color-option').click(function() {
     $('.color-option').removeClass('selected');
