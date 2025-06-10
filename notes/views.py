@@ -103,7 +103,7 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["colors"] = Color.objects.all()
+        context["colors"] = Color.objects.filter(owner=self.request.user)
         context["note_type"] = self.kwargs.get("note_type", "note")
         return context
 

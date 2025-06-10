@@ -56,6 +56,7 @@ class Note(models.Model):
     color = models.ForeignKey(Color, on_delete=models.CASCADE, related_name="notes")
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    is_public = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-modified_at"]
