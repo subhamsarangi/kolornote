@@ -52,14 +52,14 @@
 #textNoteCreate {
     width: 100%;
     resize: vertical;
-    min-height: 300px;
+    min-height: 200px;
 }
 
 .mx-auto{
-    padding: 0;
+    padding: 2px!important;
 }
 .card-body{
-    padding: 4px!important;
+    padding: 6px!important;
 }
 
 .checklist-item {
@@ -120,7 +120,7 @@
 .new-item textarea {
     flex: 1;
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid #666;
     border-radius: 4px;
     margin-right: 10px;
 }
@@ -136,6 +136,11 @@
     border-radius: 4px;
 }
 
+.color-option-wrapper{
+    display: inline-flex;
+    flex-flow: column;
+    padding-right: 1em;
+}
 .color-option {
     display: inline-block;
     width: 30px;
@@ -143,7 +148,8 @@
     border-radius: 50%;
     margin: 5px;
     cursor: pointer;
-    border: 3px solid transparent;
+    border: 2px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0);
     transition: all 0.2s;
 }
 
@@ -152,8 +158,12 @@
 }
 
 .color-option.selected {
-    border-color: #000;
+    border-color: #444;
     transform: scale(1.2);
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+.color-option-name.selected {
+    text-decoration:underline;
 }
 
 @media (max-width: 768px) {
@@ -170,7 +180,7 @@
   {% csrf_token %}
   <div class="row">
     <div class="col-md-10 mx-auto">
-        <div class="card" id="noteCard" style="border-left: 4px solid #0c3766;">
+        <div class="card" id="noteCard" style="border-left: 4px solid {{ colors.0.hex_value }};">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="mb-0">Create {{ note_type|title }}</h4>
                 <span class="badge bg-secondary">{{ note_type|title }}</span>
@@ -185,11 +195,14 @@
                     <label>Color</label>
                     <div>
                         {% for color in colors %}
-                        <span class="color-option" 
+                        <div class="color-option-wrapper">
+                            <span class="color-option" 
                               data-color-id="{{ color.id }}" 
                               data-color-hex="{{ color.hex_value }}"
                               style="background-color: {{ color.hex_value }};"
                               title="{{ color.name }}"></span>
+                            <span class="color-option-name"><small>{{ color.name }}</small></span>
+                        </div>
                         {% endfor %}
                     </div>
                     <input type="hidden" id="selectedColor" name="color" value="{{ colors.0.id }}">
@@ -198,15 +211,6 @@
                 <div class="content">
                     {% if note_type == 'checklist' %}
                     <div class="checklist">
-                        <div class="sticky-buttons">
-                            <button type="submit" class="save-btn btn btn-sm">
-                                <i class="fa fa-floppy-o"></i> Create Checklist
-                            </button>
-                            <a href="{% url 'notes:list' %}" class="btn btn-secondary btn-sm">
-                                <i class="fa fa-times"></i> Cancel
-                            </a>
-                        </div>
-                        
                         <div class="new-item">
                             <textarea id="newItemText" placeholder="Add checklist item..."></textarea>
                             <button type="button" class="add-btn btn btn-sm" onclick="addNewItem()">
@@ -217,9 +221,21 @@
                         <div id="checklistItems"></div>
                         
                         <textarea id="checklistContent" name="content" style="display: none;"></textarea>
+
+                        <div class="sticky-buttons">
+                            <button type="submit" class="save-btn btn btn-sm">
+                                <i class="fa fa-floppy-o"></i> Create Checklist
+                            </button>
+                            <a href="{% url 'notes:list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fa fa-times"></i> Cancel
+                            </a>
+                        </div>
                     </div>
                     {% else %}
                     <div class="note">
+                        <div class="form-group">
+                            <textarea required id="textNoteCreate" name="content" placeholder="Start writing your note..."></textarea>
+                        </div>
                         <div class="sticky-buttons">
                             <button type="submit" class="save-btn btn btn-sm">
                                 <i class="fa fa-floppy-o"></i> Create Note
@@ -227,10 +243,6 @@
                             <a href="{% url 'notes:list' %}" class="btn btn-secondary btn-sm">
                                 <i class="fa fa-times"></i> Cancel
                             </a>
-                        </div>
-                        
-                        <div class="form-group">
-                            <textarea required id="textNoteCreate" name="content" placeholder="Start writing your note..."></textarea>
                         </div>
                     </div>
                     {% endif %}
@@ -240,6 +252,7 @@
     </div>
   </div>
 </form>
+
 {% endblock %}
 
 {% block extrajs %}
@@ -247,13 +260,16 @@
 // Color selection
 $('.color-option').click(function() {
     $('.color-option').removeClass('selected');
+    $('.color-option-name').removeClass('selected');
     $(this).addClass('selected');
+    $(this).next('.color-option-name').addClass('selected');
     $('#selectedColor').val($(this).data('color-id'));
     $('#noteCard').css('border-left-color', $(this).data('color-hex'));
 });
 
 // Set default color selection
 $('.color-option').first().addClass('selected');
+$('.color-option-name').first().addClass('selected');
 
 {% if note_type == 'checklist' %}
 let checklistData = [];
@@ -364,7 +380,7 @@ $('#newItemText').keypress(function(e) {
 function adjustTextareaRows() {
     const textarea = document.getElementById('textNoteCreate');
     const lineHeight = 20;
-    const availableHeight = window.innerHeight * 0.6;
+    const availableHeight = window.innerHeight * 0.4;
     const rows = Math.floor(availableHeight / lineHeight);
     textarea.rows = rows;
 }
@@ -373,11 +389,21 @@ window.addEventListener('resize', adjustTextareaRows);
 window.addEventListener('load', adjustTextareaRows);
 {% endif %}
 
+let clickedButton = null;
+let clickedButtonHtml = null;
+$('button[type=submit]').on('click', function() {
+    clickedButton = this;
+    clickedButtonHtml = $(this).html().trim();
+});
+
 // Form validation
 $('#createForm').submit(function(e) {
     const title = $('#title').val().trim();
     if (!title) {
         e.preventDefault();
+        $(clickedButton).prop('disabled', false).blur();
+        document.body.focus();
+        $(clickedButton).html(clickedButtonHtml);
         toastr.error('Please enter a title');
         return false;
     }
@@ -385,6 +411,9 @@ $('#createForm').submit(function(e) {
     {% if note_type == 'checklist' %}
     if (checklistData.length === 0) {
         e.preventDefault();
+        $(clickedButton).prop('disabled', false).blur();
+        document.body.focus();
+        $(clickedButton).html(clickedButtonHtml);
         toastr.error('Please add at least one checklist item');
         return false;
     }
@@ -392,10 +421,17 @@ $('#createForm').submit(function(e) {
     const content = $('#textNoteCreate').val().trim();
     if (!content) {
         e.preventDefault();
+        $(clickedButton).prop('disabled', false).blur();
+        document.body.focus();
+        $(clickedButton).html(clickedButtonHtml);
         toastr.error('Please enter some content');
         return false;
     }
     {% endif %}
+
+    // ✅ Only show loading spinner after validation passes
+    $(clickedButton).prop('disabled', true);
+    $(clickedButton).html('<span class="spinner-border spinner-border-sm me-2"></span>Loading...');
 });
 </script>
 {% endblock %}
