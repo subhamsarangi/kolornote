@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import Q
+from django.forms import BooleanField
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -124,6 +125,18 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
     fields = ["title", "content", "color"]
     template_name = "notes/create.html"
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        if self.request.user.is_superuser:
+            form.fields["is_public"] = BooleanField(
+                required=False,
+                label="Public",
+                initial=False,
+                help_text="Make this note public",
+            )
+        return form
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["colors"] = Color.objects.filter(owner=self.request.user)
@@ -133,6 +146,9 @@ class NoteCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         form.instance.note_type = self.kwargs.get("note_type", "note")
+
+        if not self.request.user.is_superuser:
+            form.instance.is_public = False
 
         response = super().form_valid(form)
         messages.success(
