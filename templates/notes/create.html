@@ -281,19 +281,6 @@
 
 {% block extrajs %}
 <script>
-const textarea = document.getElementById("newItemText");
-const clearBtn = document.querySelector(".clear-btn");
-
-textarea.addEventListener("input", () => {
-    clearBtn.disabled = textarea.value.trim() === "";
-});
-
-function clearText() {
-    textarea.value = "";
-    clearBtn.disabled = true;
-    textarea.focus();
-}
-
 // Color selection
 $('.color-option').click(function() {
     $('.color-option').removeClass('selected');
@@ -309,6 +296,19 @@ $('.color-option').first().addClass('selected');
 $('.color-option-name').first().addClass('selected');
 
 {% if note_type == 'checklist' %}
+const textarea = document.getElementById("newItemText");
+const clearBtn = document.querySelector(".clear-btn");
+
+textarea.addEventListener("input", () => {
+    clearBtn.disabled = textarea.value.trim() === "";
+});
+
+function clearText() {
+    textarea.value = "";
+    clearBtn.disabled = true;
+    textarea.focus();
+}
+
 let checklistData = [];
 
 function parseChecklist(text) {
@@ -414,6 +414,7 @@ $('#newItemText').keypress(function(e) {
 });
 
 {% else %}
+
 function adjustTextareaRows() {
     const textarea = document.getElementById('textNoteCreate');
     const lineHeight = 20;
