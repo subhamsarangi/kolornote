@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Kolornote{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Your Profile</h2>
+            {% if user.is_superuser %}
+                <a href="/admin/" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="fa fa-cog"></i> Admin Portal
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- User Info Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Member Since</label>
+                        <input type="text" class="form-control" value="{{ user.date_joined|date:'F d, Y' }}" readonly>
+                    </div>
+                    <button type="submit" name="update_profile" class="btn btn-primary">
+                        <i class="fa fa-save"></i> Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Change Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Change Password</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ password_form.old_password.id_for_label }}" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" name="old_password" id="{{ password_form.old_password.id_for_label }}" required>
+                        {% if password_form.old_password.errors %}
+                            <div class="text-danger small">{{ password_form.old_password.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">New Password</label>
+                        <input type="password" class="form-control" name="new_password1" id="{{ password_form.new_password1.id_for_label }}" required>
+                        {% if password_form.new_password1.errors %}
+                            <div class="text-danger small">{{ password_form.new_password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" name="new_password2" id="{{ password_form.new_password2.id_for_label }}" required>
+                        {% if password_form.new_password2.errors %}
+                            <div class="text-danger small">{{ password_form.new_password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="change_password" class="btn btn-warning">
+                        <i class="fa fa-key"></i> Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

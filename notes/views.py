@@ -5,25 +5,58 @@ import re
 import zipfile
 
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.db import transaction
 from django.db.models import Q
 from django.forms import BooleanField
 from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views.decorators.http import require_POST
 
 from accounts.forms import EmailRegistrationForm, EmailLoginForm
-from .forms import ImportForm, ColorUpdateForm
+from .forms import ImportForm, ColorUpdateForm, ProfileForm
 from .models import Note, Color
 
 
 logger = logging.getLogger(__name__)
+
+
+@login_required
+def profile(request):
+    if request.method == "POST":
+        if "update_profile" in request.POST:
+            form = ProfileForm(request.POST, instance=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Your profile has been updated successfully!")
+                return redirect("notes:profile")
+
+        elif "change_password" in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Keep user logged in
+                messages.success(request, "Your password was successfully updated!")
+                return redirect("notes:profile")
+            else:
+                messages.error(request, "Please correct the error below.")
+
+    else:
+        form = ProfileForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+
+    context = {
+        "form": form,
+        "password_form": password_form,
+    }
+    return render(request, "notes/profile.html", context)
 
 
 class EmailRegisterView(CreateView):

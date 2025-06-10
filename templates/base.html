@@ -49,7 +49,7 @@
                             User
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#">Your Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'notes:profile' %}">Your Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger small" href="{% url 'notes:logout' %}">Logout</a></li>
                         </ul>

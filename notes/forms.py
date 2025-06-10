@@ -1,5 +1,19 @@
 from django import forms
+from django.forms import ModelForm
+
 from .models import Color
+from accounts.models import CustomUser
+
+
+class ProfileForm(ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["first_name", "last_name", "email"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"class": "form-control"}),
+            "last_name": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+        }
 
 
 class ImportForm(forms.Form):
