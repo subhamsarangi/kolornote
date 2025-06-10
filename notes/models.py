@@ -2,6 +2,7 @@ import secrets
 
 from django.db import models
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.conf import settings
 
 
@@ -63,3 +64,11 @@ class Note(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.is_public:
+            if not self.owner.is_superuser:
+                raise ValidationError("Only superusers can create public notes.")
+            if not self.color.is_default:
+                raise ValidationError("Color must be a default color for public notes.")
+        super().save(*args, **kwargs)

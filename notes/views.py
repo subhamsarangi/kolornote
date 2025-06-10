@@ -84,7 +84,7 @@ class NoteListView(LoginRequiredMixin, ListView):
 
 
 class NoteDetailView(LoginRequiredMixin, DetailView):
-    """Display single note detail"""
+    """Display note detail"""
 
     model = Note
     template_name = "notes/detail.html"
@@ -92,6 +92,29 @@ class NoteDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return Note.objects.filter(owner=self.request.user).select_related("color")
+
+
+class PublicNoteListView(ListView):
+    """Display public list of notes"""
+
+    model = Note
+    template_name = "notes/public_list.html"
+    context_object_name = "notes"
+
+    def get_queryset(self):
+        queryset = Note.objects.filter(is_public=True)
+        return queryset
+
+
+class PublicNoteDetailView(DetailView):
+    """Display public note detail"""
+
+    model = Note
+    template_name = "notes/public_detail.html"
+    context_object_name = "note"
+
+    def get_queryset(self):
+        return Note.objects.filter(is_public=True)
 
 
 class NoteCreateView(LoginRequiredMixin, CreateView):

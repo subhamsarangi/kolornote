@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}[public] {{ note.title }} - Kolornote{% endblock %}
+
+{% block extracss %}
+<style>
+.content {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+#textNoteView {
+    white-space: pre-wrap;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+.mx-auto{
+    padding: 2px!important;
+}
+.card-body{
+    padding: 6px!important;
+}
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: grab;
+}
+
+.checklist-item input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 0.75rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+.checklist-item span {
+    flex: 1;
+    line-height: 1.4;
+}
+.checklist-item input:checked+label {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.view-mode .checklist-item {
+    cursor: default;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ note.title }}</h4>
+                <span>
+                    <span class="badge bg-secondary">{{ note.note_type|title }}</span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">
+                        Created: {{ note.created_at|date:"M d, Y H:i" }} •
+                        Modified: {{ note.modified_at|date:"M d, Y H:i" }}
+                    </small>
+                </div>
+
+                <div class="content">
+                    {% if note.note_type == 'checklist' %}
+                    <div class="checklist">
+                        <div id="viewMode">
+                            <div id="checklistView"></div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="note">
+                        <div id="viewModeText">
+                            <div id="textNoteView">{{ note.content }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'notes:public_list' %}" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Back to Public Notes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+if ($(".checklist").length){
+    var text = "{{ note.content|escapejs }}";
+    var checklistData = text
+        .replace(/\[\s*\]/g, '\n[ ]')
+        .replace(/\[V\]/g, '\n[V]')
+        .replace(/^\s*\n/, '')
+        .trim();
+
+    let originalData = '';
+
+    function parseChecklist(text) {
+        return text.split('\n').filter(line => line.trim()).map(line => {
+            const checked = line.startsWith('[V]');
+            const text = line.substring(3).trim();
+            return { checked, text };
+        });
+    }
+
+    function renderViewMode() {
+        const items = parseChecklist(checklistData);
+        const html = items.map(item => `
+            <div class="checklist-item">
+                <input type="checkbox" ${item.checked ? 'checked' : ''} disabled>
+                <span>${item.text}</span>
+            </div>
+        `).join('');
+        document.getElementById('checklistView').innerHTML = html;
+    }
+    renderViewMode();   
+}
+</script>
+
+{% endblock %}

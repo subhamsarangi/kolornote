@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Public Notes - Kolornote{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Public Notes</h2>
+        <hr>
+        <div class="row">
+            {% for note in notes %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <a href="{% url 'notes:public_detail' note.pk %}" class="note-card-link">
+                    <div class="card note-card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ note.title }}</h5>
+                            <small class="text-muted">{{ note.modified_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <h4>No Public notes found</h4>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
