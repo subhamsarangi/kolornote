@@ -1,6 +1,53 @@
 {% extends 'base.html' %}
-
+{% load timezone_tags %}
 {% block title %}Profile - Kolornote{% endblock %}
+
+{%block extracss%}
+<style>
+.info-item {
+  margin-bottom: .5rem;
+}
+
+.info-label{
+    color: #555;
+}
+.info-value {
+  font-size: 1rem;
+  color: #111827;
+  padding: 0.25rem 0;
+}
+
+.info-note {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Alternative card-style approach */
+.info-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.info-card .info-label {
+  color: #374151;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.info-card .info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111827;
+  border: none;
+  padding: 0;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -45,10 +92,7 @@
                             <div class="text-danger small">{{ form.email.errors }}</div>
                         {% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Member Since</label>
-                        <input type="text" class="form-control" value="{{ user.date_joined|date:'F d, Y' }}" readonly>
-                    </div>
+
                     <button type="submit" name="update_profile" class="btn btn-primary">
                         <i class="fa fa-save"></i> Update Profile
                     </button>
@@ -56,34 +100,147 @@
             </div>
         </div>
 
-        <!-- Password Change Card -->
-        <div class="card">
+        <!-- Login History Card -->
+        
+        <div class="card mb-4">
             <div class="card-header">
-                <h5 class="card-title mb-0">Change Password</h5>
+                <h5 class="card-title mb-0">
+                    <i class="fa fa-history"></i> Login History
+                </h5>
+                <small class="text-muted">Recent login activities on your account</small>
             </div>
             <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                        <div class="info-value"><span class="info-label">Member Since</span> {{ user.date_joined|user_timezone:user|date:'F d, Y g:i A' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                        <div class="info-value"><span class="info-label">Timezone during Registration</span> {{ user.timezone|default:'UTC' }}</div>
+                        <div class="info-note">
+                            Current time in your timezone: {% user_current_time user %}
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                {% if login_history %}
+                    <!-- Login history table -->
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Location</th>
+                                    <th>Device Timezone</th>
+                                    <th>IP Address</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for login in login_history %}
+                                <tr>
+                                    <td>
+                                        <!-- Display login time in user's timezone -->
+                                        <strong>{{ login.login_time|user_timezone:user|date:"M d, Y" }}</strong><br>
+                                        <small class="text-muted">{{ login.login_time|user_timezone:user|date:"g:i A" }}</small>
+                                    </td>
+                                    <td>
+                                        {% if login.ip_city and login.ip_country %}
+                                            <i class="fa fa-map-marker text-muted"></i> 
+                                            {{ login.ip_city }}, {{ login.ip_country }}
+                                            {% if login.ip_timezone %}
+                                                <br><small class="text-muted">{{ login.ip_timezone }}</small>
+                                            {% endif %}
+                                        {% elif login.ip_country %}
+                                            <i class="fa fa-map-marker text-muted"></i> {{ login.ip_country }}
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ login.device_timezone }}</span>
+                                    </td>
+                                    <td>
+                                        <code class="small">{{ login.ip_address }}</code>
+                                    </td>
+                                    <td>
+                                        {% if login.login_successful %}
+                                            <span class="badge bg-success">
+                                                <i class="fa fa-check"></i> Success
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fa fa-times"></i> Failed
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination for login history -->
+                    {% if login_history.has_other_pages %}
+                        <nav aria-label="Login history pagination">
+                            <ul class="pagination pagination-sm justify-content-center mt-3">
+                                {% if login_history.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ login_history.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% endif %}
+                                
+                                {% for num in login_history.paginator.page_range %}
+                                    {% if login_history.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if login_history.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ login_history.next_page_number }}">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% else %}
+                    <!-- No login history message -->
+                    <div class="text-center py-4">
+                        <i class="fa fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No login history available yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Password Change Card -->
+        <div class="card mb-4">
+            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#changePasswordBody" aria-expanded="true">
+                <h5 class="card-title mb-0">Change Password</h5>
+            </div>
+            <div id="changePasswordBody" class="card-body collapse">
                 <form method="post">
-                    {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="ePxKWKnVGKtuhNNzUtbIJAFGgO6CBwxe9YGhj3QtreVs1y8Bbzv4IAEfXCn0mOmj">
                     <div class="mb-3">
-                        <label for="{{ password_form.old_password.id_for_label }}" class="form-label">Current Password</label>
-                        <input type="password" class="form-control" name="old_password" id="{{ password_form.old_password.id_for_label }}" required>
-                        {% if password_form.old_password.errors %}
-                            <div class="text-danger small">{{ password_form.old_password.errors }}</div>
-                        {% endif %}
+                        <label for="id_old_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" name="old_password" id="id_old_password" required="">
                     </div>
                     <div class="mb-3">
-                        <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">New Password</label>
-                        <input type="password" class="form-control" name="new_password1" id="{{ password_form.new_password1.id_for_label }}" required>
-                        {% if password_form.new_password1.errors %}
-                            <div class="text-danger small">{{ password_form.new_password1.errors }}</div>
-                        {% endif %}
+                        <label for="id_new_password1" class="form-label">New Password</label>
+                        <input type="password" class="form-control" name="new_password1" id="id_new_password1" required="">
                     </div>
                     <div class="mb-3">
-                        <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">Confirm New Password</label>
-                        <input type="password" class="form-control" name="new_password2" id="{{ password_form.new_password2.id_for_label }}" required>
-                        {% if password_form.new_password2.errors %}
-                            <div class="text-danger small">{{ password_form.new_password2.errors }}</div>
-                        {% endif %}
+                        <label for="id_new_password2" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" name="new_password2" id="id_new_password2" required="">
                     </div>
                     <button type="submit" name="change_password" class="btn btn-warning">
                         <i class="fa fa-key"></i> Change Password
@@ -91,6 +248,7 @@
                 </form>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}

@@ -12,18 +12,20 @@
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
+                    <!-- Hidden timezone field for login tracking -->
+                    <input type="hidden" name="device_timezone" id="device-timezone-field" value="UTC">
                     <div class="mb-3">
                         <label for="{{ form.username.id_for_label }}" class="form-label">Email</label>
                         {{ form.username }}
                         {% if form.username.errors %}
-                        <div class="text-danger">{{ form.username.errors }}</div>
+                        <div class="text text-danger">{{ form.username.errors }}</div>
                         {% endif %}
                     </div>
                     <div class="mb-3">
                         <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
                         {{ form.password }}
                         {% if form.password.errors %}
-                        <div class="text-danger">{{ form.password.errors }}</div>
+                        <div class="text text-danger">{{ form.password.errors }}</div>
                         {% endif %}
                     </div>
                     {% if form.non_field_errors %}
@@ -41,6 +43,62 @@
 {% block extrajs %}
 <script>
 $(document).ready(function() {
+    function detectTimezone() {
+        try {
+            // Primary method: Intl.DateTimeFormat
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (timezone) {
+                return timezone;
+            }
+        } catch (e) {
+            console.warn('Intl.DateTimeFormat not supported');
+        }
+        
+        // Fallback method: timezone offset
+        const offset = new Date().getTimezoneOffset();
+        const offsetHours = Math.abs(offset / 60);
+        const sign = offset > 0 ? '-' : '+';
+        
+        // Common timezone mappings based on offset
+        const timezoneMap = {
+            '-12': 'Pacific/Kwajalein',
+            '-11': 'Pacific/Samoa',
+            '-10': 'Pacific/Honolulu',
+            '-9': 'America/Anchorage',
+            '-8': 'America/Los_Angeles',
+            '-7': 'America/Denver',
+            '-6': 'America/Chicago',
+            '-5': 'America/New_York',
+            '-4': 'America/Halifax',
+            '-3': 'America/Sao_Paulo',
+            '-2': 'Atlantic/South_Georgia',
+            '-1': 'Atlantic/Azores',
+            '0': 'UTC',
+            '1': 'Europe/London',
+            '2': 'Europe/Berlin',
+            '3': 'Europe/Moscow',
+            '4': 'Asia/Dubai',
+            '5': 'Asia/Karachi',
+            '5.5': 'Asia/Kolkata',  // India
+            '6': 'Asia/Dhaka',
+            '7': 'Asia/Bangkok',
+            '8': 'Asia/Shanghai',
+            '9': 'Asia/Tokyo',
+            '10': 'Australia/Sydney',
+            '11': 'Pacific/Norfolk',
+            '12': 'Pacific/Auckland'
+        };
+        
+        const offsetKey = sign + offsetHours + (offset % 60 !== 0 ? '.5' : '');
+        const fallbackTimezone = timezoneMap[offsetKey] || 'UTC';
+        return fallbackTimezone;
+    }
+    
+    // Detect timezone immediately when page loads
+    const detectedTimezone = detectTimezone();
+    $('#device-timezone-field').val(detectedTimezone);
+    console.log('Login timezone detected:', detectedTimezone);
+
     // Add loading state to forms
     $('form').on('submit', function() {
         const submitBtn = $(this).find('button[type="submit"]');

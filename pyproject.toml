@@ -10,6 +10,8 @@ python = "^3.12"
 django = "^4.2"
 python-decouple = "^3.8"
 mysqlclient = "^2.2.7"
+pytz = "^2025.2"
+requests = "^2.32.4"
 
 [tool.poetry.group.dev.dependencies]
 django-debug-toolbar = "^4.2"

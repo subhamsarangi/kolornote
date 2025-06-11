@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
 from django.utils.translation import gettext_lazy as _
+
+from .models import CustomUser, LoginHistory
 
 
 @admin.register(CustomUser)
@@ -27,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
                 )
             },
         ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Important dates"), {"fields": ("last_login", "date_joined", "timezone")}),
     )
 
     add_fieldsets = (
@@ -39,3 +40,26 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
     )
+
+
+@admin.register(LoginHistory)
+class LoginHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "login_time",
+        "ip_address",
+        "device_timezone",
+        "ip_country",
+        "ip_city",
+        "login_successful",
+    )
+    list_filter = ("login_successful", "device_timezone", "ip_country", "login_time")
+    search_fields = ("user__email", "ip_address", "ip_country", "ip_city")
+    readonly_fields = ("login_time",)
+    ordering = ("-login_time",)
+
+    def has_add_permission(self, request):
+        return False  # Prevent manual addition
+
+    def has_change_permission(self, request, obj=None):
+        return False  # Make read-only

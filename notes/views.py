@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
 from django.forms import BooleanField
@@ -21,6 +22,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views.decorators.http import require_POST
 
 from accounts.forms import EmailRegistrationForm, EmailLoginForm
+from accounts.models import LoginHistory, CustomUser
 from .forms import ImportForm, ColorUpdateForm, ProfileForm
 from .models import Note, Color
 
@@ -52,9 +54,16 @@ def profile(request):
         form = ProfileForm(instance=request.user)
         password_form = PasswordChangeForm(request.user)
 
+    # Get login history with pagination
+    login_history = LoginHistory.objects.filter(user=request.user)
+    paginator = Paginator(login_history, 4)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
         "form": form,
         "password_form": password_form,
+        "login_history": page_obj,
     }
     return render(request, "notes/profile.html", context)
 
@@ -67,15 +76,64 @@ class EmailRegisterView(CreateView):
     success_url = reverse_lazy("notes:login")
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        Color.create_default_color(self.object)
+        print(form.cleaned_data, "form.cleaned_data+++++++++++++++++++++++++")
+        # Manually set the timezone before saving
+        user = form.save(commit=False)
+        user.timezone = form.cleaned_data.get("timezone", "UTC")
+        user.save()
+
+        Color.create_default_color(user)
         messages.success(self.request, "Account created successfully!")
-        return response
+        return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        print(form.errors, "form.errors===================")
+        return super().form_invalid(form)
 
 
 class EmailLoginView(LoginView):
     form_class = EmailLoginForm
     template_name = "registration/login.html"
+
+    def form_valid(self, form):
+        device_timezone = form.cleaned_data.get("device_timezone", "UTC")
+
+        response = super().form_valid(form)
+
+        LoginHistory.create_login_record(
+            user=self.request.user,
+            request=self.request,
+            device_timezone=device_timezone,
+            success=True,
+        )
+
+        messages.success(
+            self.request,
+            f"Welcome back, {self.request.user.first_name or self.request.user.email}!",
+        )
+        return response
+
+    def form_invalid(self, form):
+        """Handle failed login attempt"""
+        response = super().form_invalid(form)
+
+        # Try to get user from email if provided
+        email = form.data.get("username")
+        if email:
+            try:
+                user = CustomUser.objects.get(email=email)
+                device_timezone = form.data.get("device_timezone", "UTC")
+
+                LoginHistory.create_login_record(
+                    user=user,
+                    request=self.request,
+                    device_timezone=device_timezone,
+                    success=False,
+                )
+            except CustomUser.DoesNotExist:
+                pass
+
+        return response
 
 
 class NoteListView(LoginRequiredMixin, ListView):
