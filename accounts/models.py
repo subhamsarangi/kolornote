@@ -1,9 +1,12 @@
+import threading
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
     BaseUserManager,
 )
 from django.db import models
+from django.db import transaction
 from django.utils import timezone
 import pytz
 import requests
@@ -106,16 +109,26 @@ class LoginHistory(models.Model):
         )
 
         # Get IP info asynchronously
-        try:
-            location_info = cls.get_ip_location(ip_address)
-            if location_info:
-                login_record.ip_country = location_info.get("country", "")
-                login_record.ip_city = location_info.get("city", "")
-                login_record.ip_timezone = location_info.get("timezone", "")
-                login_record.save()
-        except Exception as e:
-            # Log the error but don't fail the login
-            print(f"Error getting IP location: {e}")
+        def update_ip_info():
+            print("thread job -----------------------------")
+            try:
+                location_info = cls.get_ip_location(ip_address)
+                if location_info:
+                    # Use select_for_update to prevent race conditions
+                    with transaction.atomic():
+                        record = cls.objects.select_for_update().get(id=login_record.id)
+                        record.ip_country = location_info.get("country", "")
+                        record.ip_city = location_info.get("city", "")
+                        record.ip_timezone = location_info.get("timezone", "")
+                        record.save()
+            except Exception as e:
+                # Log the error but don't fail the login
+                print(f"Error getting IP location: {e}")
+
+        # Start background thread
+        thread = threading.Thread(target=update_ip_info)
+        thread.daemon = True
+        thread.start()
 
         return login_record
 
@@ -136,19 +149,18 @@ class LoginHistory(models.Model):
             return {"country": "Local", "city": "Local", "timezone": "UTC"}
 
         try:
-            # Ufree service, no API key
+            # Free service, no API key
             response = requests.get(
                 f"http://ip-api.com/json/{ip_address}?fields=country,city,timezone",
                 timeout=5,
             )
             if response.status_code == 200:
                 data = response.json()
-                if data.get("status") == "success":
-                    return {
-                        "country": data.get("country", ""),
-                        "city": data.get("city", ""),
-                        "timezone": data.get("timezone", ""),
-                    }
+                return {
+                    "country": data.get("country", ""),
+                    "city": data.get("city", ""),
+                    "timezone": data.get("timezone", ""),
+                }
         except Exception as e:
             print(f"Error fetching IP location: {e}")
 
